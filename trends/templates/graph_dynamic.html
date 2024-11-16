@@ -1,0 +1,196 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block title %}Call Trends Graph
+{% endblock %}
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'uptime' %}">Call Trends Graph</a></h1>
+{% endblock %}
+  {% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a href="{% url 'index' %}">Call Server</a>
+    &rsaquo;     
+    <a href="{% url 'trends' %}">Call Trends Graph</a>
+  </div>
+{% endblock %}
+{% block content %}
+  <div>    
+    <div id="toolbar">      
+      <form id="changelist-search" method="get" action="{% url 'trends_search' %}" role="search">
+        <div>
+          <a href="{% url 'index' %}"><input type="button" value="Call Server Home" style="background-color: #0004fd !important;"/></a>
+          <a href="{% url 'uptime' %}" style="margin-left: 25px;"><input class="linkU" type="button" value="View Servers Uptime" style="background-color: #227791 !important;" /></a>
+          <a href="{% url 'trends' %}" style="margin-left: 25px;"><input class="linkT" type="button" value="View Call Trends" style="background-color: #ab4323 !important;" /></a>
+          <a href="{% url 'graph_static' %}" style="margin-left: 25px;"><input type="button" value="View Call Trends Graph Static" style="background-color: #ab4323 !important;"  /></a>
+          <a href="{% url 'graph_dynamic' %}" style="margin-left: 25px;"><input type="button" value="View Call Trends Graph Dynamic" style="background-color: #ab4323 !important;"/></a>
+            <br><br>          
+        </div>
+      </form>
+    </div>
+    <div class="refresh-indicator">
+      <div class="refresh-icon">
+        <i class="fas fa-sync-alt"></i>
+      </div>
+      <div class="refresh-text">
+        Refreshing...
+      </div>
+    </div>
+    <script type="style">
+      .refresh-indicator {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        display: none;
+      }      
+      .refresh-icon {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }      
+      .refresh-text {
+        font-size: 18px;
+        font-weight: bold;
+      }
+    </script>
+    <script>
+      function showRefreshIndicator() {
+        document.querySelector('.refresh-indicator').style.display = 'block';
+        document.querySelector('.refresh-indicator').style.opacity = 1;
+        setTimeout(function() {
+          document.querySelector('.refresh-indicator').style.opacity = 0;
+          setTimeout(function() {
+            document.querySelector('.refresh-indicator').style.display = 'none';
+          }, 500);
+        }, 2000);
+      }
+      window.onload = function () {     
+        var dataPoints1 = [];
+        var dataPoints2 = [];            
+        var chart = new CanvasJS.Chart("chartContainer", {
+          zoomEnabled: true,
+          dataPointWidth: 20,
+          title: {
+            text: "Call vs Abn"
+          },
+          axisX: {
+            title: "chart updates every 5 secs",
+            labelAngle: -45,
+            valueFormatString: 'HH:mm:ss TT',
+          },
+          axisY:{
+            prefix: ""
+          }, 
+          toolTip: {
+            shared: true
+          },
+          legend: {
+            cursor:"pointer",
+            verticalAlign: "top",
+            fontSize: 22,
+            fontColor: "dimGrey",
+            itemclick : toggleDataSeries
+          },
+          data: [{ 
+            type: "column",
+            xValueType: "number",
+            yValueFormatString: "####",
+            xValueFormatString: "hh:mm:ss TT",
+            showInLegend: true,
+            name: "Call",
+            dataPoints: dataPoints1
+            },
+            {				
+              type: "line",
+              xValueType: "dateTime",
+              yValueFormatString: "####",
+              showInLegend: true,
+              name: "Abn" ,
+              dataPoints: dataPoints2
+          }]
+        });      
+        function toggleDataSeries(e) {
+          if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+            e.dataSeries.visible = false;
+          }
+          else {
+            e.dataSeries.visible = true;
+          }
+          chart.render();
+        }      
+        var updateInterval = 5000;
+        var yValue1 = 0; 
+        var yValue2 = 0;      
+        var time = new Date;
+        time.setHours(0);
+        time.setMinutes(00);
+        time.setSeconds(00);
+        time.setMilliseconds(00);      
+        function updateChart() {
+          fetch("{% url 'get_datapoints' %}", {
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            },
+            method: "POST"
+          }).then(function(data) {return data.json()}).then(function(data) {    
+          let datapoints_1 = data.datapoints_1;
+          let datapoints_2 = data.datapoints_2;        
+          dataPoints1.length = 0;
+          dataPoints2.length = 0;        
+          for (var key in datapoints_1) {
+            var existingPoint = dataPoints1.find(point => point.x === datapoints_1[key]['x']);
+            if (!existingPoint) {
+              dataPoints1.push({
+                x: datapoints_1[key]['x'],
+                y: datapoints_1[key]['y']
+              });
+            }
+          }        
+            for (var key in datapoints_2) {
+              var existingPoint = dataPoints2.find(point => point.x === datapoints_2[key]['x']);
+              if (!existingPoint) {
+                dataPoints2.push({
+                  x: datapoints_2[key]['x'],
+                  y: datapoints_2[key]['y']
+                });            
+                yValue1 = datapoints_1[key]['y'];
+                yValue2 = datapoints_2[key]['y'];
+              }    
+
+              var currentTime = new Date();
+              showRefreshIndicator();
+            }
+          });
+          chart.options.data[0].legendText = " Call  " + yValue1;
+          chart.options.data[1].legendText = " Abn  " + yValue2; 
+          chart.render();
+        }
+        setInterval(function(){updateChart()}, updateInterval);      
+        updateChart();
+      }
+      function getCookie(cname) {
+        var name = cname + "=";
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for(var i = 0; i <ca.length; i++) {
+          var c = ca[i];
+          while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+          }
+          if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+          }
+        }
+        return "";
+      }
+      </script>
+      <div id="chartContainer" style="height: 300px; width: 100%;"></div>
+      <script src="{% static "canvasjs.min.js" %}"></script>  
+    </div>  
+  </div>    
+{% endblock %}
+
+

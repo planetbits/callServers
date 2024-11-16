@@ -1,0 +1,62 @@
+{% extends "admin/base_site.html" %}
+{% block title %}Servers Uptime Details
+{% endblock %}
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'uptime' %}">Servers Uptime Details</a></h1>
+{% endblock %}
+  {% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a href="{% url 'index' %}">Call Server</a>
+    &rsaquo;     
+    <a href="{% url 'uptime' %}">Servers Uptime Details</a>
+  </div>
+{% endblock %}
+{% block content %}
+  <div>    
+    <div id="toolbar">      
+      <form id="changelist-search" method="get" action="{% url 'uptime_search' %}" role="search">
+        <div>
+          <a href="{% url 'index' %}"><input type="button" value="Call Server Home" style="background-color: #0004fd !important;"/></a>
+          <a href="{% url 'uptime' %}" style="margin-left: 25px;"><input class="linkU" type="button" value="View Servers Uptime" style="background-color: #227791 !important;" /></a>
+          <a href="{% url 'trends' %}" style="margin-left: 25px;"><input class="linkT" type="button" value="View Call Trends" style="background-color: #ab4323 !important;" /></a>
+            <br><br>
+          <label for="searchbar"><img src="/static/admin/img/search.svg" alt="Search" /></label>
+          <input type="text" size="40" name="q" value="{{q}}" id="searchbar" />
+          <input type="submit" value="Search" />
+        </div>
+      </form>
+    </div>
+    <h3>List of Servers</h3>
+    <blockquote>Note: Uptime > 25:00:00 will display by RED , Uptime >=20:00:00 and <25:00:00 will display by Yellow Colour.
+  </blockquote>
+    <br>
+    <table>
+      <thead>
+        <tr>
+          <th>Hostname</th>
+          <th>HostIntIP</th>
+          <th>BootTime</th>
+          <th>UpTime</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for server in servers %}
+          <tr 
+            {% if server.UpTime  > '25:00:00' %}            
+              style="background-color: red;"
+            {% elif server.UpTime  > '20:00:00' and server.UpTime  < '25:00:00' %} 
+              style="background-color: yellow;"
+            {% endif %}
+          >
+            <td>{{ server.HostName }}</td>
+            <td>{{ server.HostIntIP }}</td>
+            <td>{{ server.BootTime }}</td>
+            <td>{{ server.UpTime }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>    
+{% endblock %}
+
+

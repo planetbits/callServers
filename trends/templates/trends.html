@@ -1,0 +1,53 @@
+{% extends "admin/base_site.html" %}
+{% block title %}Call Trends Details
+{% endblock %}
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'uptime' %}">Call Trends Details</a></h1>
+{% endblock %}
+  {% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a href="{% url 'index' %}">Call Server</a>
+    &rsaquo;     
+    <a href="{% url 'trends' %}">Call Trends Details</a>
+  </div>
+{% endblock %}
+{% block content %}
+  <div>    
+    <div id="toolbar">      
+      <form id="changelist-search" method="get" action="{% url 'trends_search' %}" role="search">
+        <div>
+          <a href="{% url 'index' %}"><input type="button" value="Call Server Home" style="background-color: #0004fd !important;"/></a>
+          <a href="{% url 'uptime' %}" style="margin-left: 25px;"><input class="linkU" type="button" value="View Servers Uptime" style="background-color: #227791 !important;" /></a>
+          <a href="{% url 'trends' %}" style="margin-left: 25px;"><input class="linkT" type="button" value="View Call Trends" style="background-color: #ab4323 !important;" /></a>
+          <a href="{% url 'graph_static' %}" style="margin-left: 25px;"><input type="button" value="View Call Trends Graph Static" style="background-color: #ab4323 !important;"  /></a>
+          <a href="{% url 'graph_dynamic' %}" style="margin-left: 25px;"><input type="button" value="View Call Trends Graph Dynamic" style="background-color: #ab4323 !important;"/></a>
+            <br><br>            
+          <label for="searchbar"><img src="/static/admin/img/search.svg" alt="Search" /></label>
+          <input type="text" size="40" name="q" value="{{q}}" id="searchbar" />
+          <input type="submit" value="Search" style="background-color: #ab4323 !important;" />
+        </div>
+      </form>
+    </div>
+    <h3>Call Trends List</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Calls</th>
+          <th>Abnd</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for trend in trends %}
+          <tr>
+            <td>{{ trend.Time }}</td>
+            <td>{{ trend.Calls }}</td>
+            <td>{{ trend.Abnd }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>    
+{% endblock %}
+
+

@@ -1,0 +1,49 @@
+{% extends "admin/base_site.html" %}
+{% block title %}Servers Uptime Details
+{% endblock %}
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'index' %}">Call Server HomePage</a></h1>
+{% endblock %}
+{% block nav-global %}
+  {% endblock %}
+  {% block breadcrumbs %}
+  <div class="breadcrumbs">    
+    <a href="{% url 'index' %}">Call Server</a>
+  </div>
+{% endblock %}
+{% block content %}
+<div class="md-12" style="margin-left: 25px;">  
+  <a href="{% url 'index' %}"><input type="button" value="Call Server Home" style="background-color: #0004fd !important;"/></a>
+  <a href="{% url 'uptime' %}" style="margin-left: 25px;"><input class="linkU" type="button" value="View Servers Uptime" style="background-color: #227791 !important;" /></a>
+  <a href="{% url 'trends' %}" style="margin-left: 25px;"><input class="linkT" type="button" value="View Call Trends" style="background-color: #ab4323 !important;" /></a>
+  </div>  
+  
+  <div class="banner">
+    <p>Welcome to our Call Server Site</p>
+  </div>
+  <style>
+    .linkH{
+      background-color: #0004fd !important;
+    }
+    .linkU{
+      background-color: #62a3a3 !important;
+    }
+    .linkT{
+      background-color: #ab4323 !important;
+    }
+    .banner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      font-size: 36px;
+      font-weight: bold;
+      color: blue;
+      background-color: bisque;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+  </style>
+{% endblock %}
